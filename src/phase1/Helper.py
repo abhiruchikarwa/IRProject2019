@@ -2,6 +2,7 @@ from collections import defaultdict
 
 from bs4 import BeautifulSoup
 import re
+from collections import defaultdict
 
 
 class Helper:
@@ -28,7 +29,6 @@ class Helper:
                     except IndexError as e:
                         print(line_list)
                         print(element)
-
 
     def create_number_of_terms_doc_dict(self):
         with open('number_of_terms_unigram.txt', 'r') as f:
@@ -68,6 +68,11 @@ class Helper:
 
 def main():
     h = Helper()
-    h.get_queries()
+    queries = h.get_queries()
+    with open('../../data/queries.txt', 'w') as f:
+        for key, value in queries.items():
+            f.write(str(key) + ': ' + value + '\n')
+    f.close()
 
-main()
+
+# main()
