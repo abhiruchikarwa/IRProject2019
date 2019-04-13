@@ -1,43 +1,61 @@
 from collections import defaultdict
-
+from os import listdir
+from os.path import isfile, join, dirname
+import nltk
 from bs4 import BeautifulSoup
+import time 
 import re
-from collections import defaultdict
+from nltk.tokenize import word_tokenize
 
 
 class Helper:
     def __init__(self):
-        self.unigram_inverted_index = defaultdict(list)
-        self.number_of_terms_doc = defaultdict(int)
+        self.ROOT_OUTPUT_FOLDER = dirname(dirname(dirname(__file__))) + "/clean_corpus/"
+        self.ROOT_INPUT_FOLDER =  dirname(dirname(dirname(__file__))) + "/data/cacm/"
         self.total_number_of_terms_corpus = 0
-        self.create_inverted_index()
-        self.create_number_of_terms_doc_dict()
+        self.clean_dataset()
+         # maintain a global inverted index
+        self.inverted_index = dict()
+        # maintain a map for document -> vocabulary count
+        self.document_term_count = dict()
+        self.generate_inverted_index()
 
-    def create_inverted_index(self):
-        with open('unigram_index.txt', 'r') as f:
-            for line in f.read().splitlines():
-                line_list = line.split()
-                term = line_list.pop(0)
-                term = term.replace(':', '')
-                for element in line_list:
-                    try:
-                        element = element.replace('(', '')
-                        element = element.replace(')', '')
-                        doc_id = element.split(':')[0]
-                        tf_doc = int(element.split(':')[1].strip())
-                        self.unigram_inverted_index[term][doc_id] = tf_doc
-                    except IndexError as e:
-                        print(line_list)
-                        print(element)
-
-    def create_number_of_terms_doc_dict(self):
-        with open('number_of_terms_unigram.txt', 'r') as f:
-            for line in f.read().splitlines():
-                doc_id = line.split(':')[0]
-                number_of_terms = int(line.split(':')[1].strip())
-                self.number_of_terms_doc[doc_id] = number_of_terms
-                self.total_number_of_terms_corpus += number_of_terms
-        # print self.number_of_terms_doc
+    def generate_inverted_index(self):
+        # fetch all file names
+        files = [f for f in listdir(self.ROOT_OUTPUT_FOLDER) if isfile(join(self.ROOT_OUTPUT_FOLDER, f))]
+        count = 0
+        # iterate through the files
+        for f in files:
+            # fetch the doc id
+            docID = f[:-4]
+            count += 1
+            # maintain a document-wide frequency distribution map
+            freq_dist = nltk.FreqDist()
+            f_obj = open(join(self.ROOT_OUTPUT_FOLDER, f),'rb')
+            text = f_obj.read().decode('utf-8')
+            # update the frequency distribution with the frequency distribution of unigrams in this document
+            freq_dist.update(text.split())  # for uni-grams
+            for ngram ,frequency in freq_dist.items():
+                # add the ngram and a posting list for this document in the inverted index if not present
+                if ngram not in self.inverted_index:
+                    self.inverted_index[ngram] = [(docID, frequency)]
+                # if ngram already present in the inverted index update the posting list with a posting for this document
+                else:
+                    posting_list = self.inverted_index[ngram]
+                    posting_list.append((docID,frequency))
+            if count == 1000:
+                break
+            #print(docID)
+            # update the document vocabulary for this document in the map    
+            self.document_term_count[docID] = len(text.split()) 
+        out_put_file = open('../unigrams_inverted_index.txt', 'w', encoding='utf-8') # for uni-grams
+        # write the inverted index into the output file
+        for k, v in self.inverted_index.items():
+            out_put_file.write(k + ":" + str(v) + "\n")
+        doc_vocab_length_file = open('../terms_in_document.txt', 'w', encoding='utf-8')
+        # write the document vocabulary map in a separate output file
+        for k, v in self.document_term_count.items():
+            doc_vocab_length_file.write(k + ":" + str(v) + "\n")
 
     def corpus_frequency(self, unigram_inverted_index):
         corpus_term_count_dictionary = {}
@@ -64,15 +82,33 @@ class Helper:
                 query = re.sub(r"(?!\d)[$,%,:.,-](?!\d)", " ", query, 0)
                 queries[query_id] = query.lower()
         return queries
+    def __crawl(self, f):
+        f_obj = open(join(self.ROOT_INPUT_FOLDER, f), "r")
+        bs_object = BeautifulSoup(f_obj.read(), "html.parser")
+            
+        # retrieve the content from the pre tags in the files
+        content_block = bs_object.find('pre') 
+        text = content_block.get_text()
+        filtered_text =" ".join([re.sub('[^a-zA-Z0-9\s\r\n-]', '', word) for word in text.split()])
+        output_file = open(self.ROOT_OUTPUT_FOLDER + f + ".txt", 'w')
+        output_file.write(filtered_text)
+        output_file.close()
 
+    def clean_dataset(self):
+        print("crawling... this might take some time!")
+        start_time = time.time()
+        files = [f for f in listdir(self.ROOT_INPUT_FOLDER) if isfile(join(self.ROOT_INPUT_FOLDER, f))]
+        for f in files:
+            self.__crawl(f)
+        end_time = time.time()
+        print("This crawl took " + str(end_time - start_time) + " seconds to complete")
 
 def main():
     h = Helper()
-    queries = h.get_queries()
-    with open('../../data/queries.txt', 'w') as f:
-        for key, value in queries.items():
-            f.write(str(key) + ': ' + value + '\n')
-    f.close()
+    # queries = h.get_queries()
+    # with open('../../data/queries.txt', 'w') as f:
+    #     for key, value in queries.items():
+    #         f.write(str(key) + ': ' + value + '\n')
+    # f.close()
 
-
-# main()
+main()

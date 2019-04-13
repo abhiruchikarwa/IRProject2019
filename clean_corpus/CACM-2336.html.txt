@@ -1,0 +1,1 @@
+Complex Error Function Algorithm C363 CACM June 1972 Kolbig K S error function for complex argument Voigt function special functions function evaluation 512 CA720609 JB January 30 1978 412 PM 2336 5 2336 2336 5 2336 2336 5 2336

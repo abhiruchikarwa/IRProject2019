@@ -1,0 +1,1 @@
+What Can We Do about the Unnecessary Diversity of Notation for Syntactic Definitions CACM November 1977 Wirth N syntactic description language extended BNF 420 CA771107 JB December 27 1977 720 AM 2909 5 2909 2909 5 2909 2909 5 2909

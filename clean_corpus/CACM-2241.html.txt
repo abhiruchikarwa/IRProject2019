@@ -1,0 +1,1 @@
+Product Type Three-point Gauss-Legendre-Simpsons Integration D1 Algorithm A439 CACM December 1972 Boland W R numerical integration product type quadrature Gaussian quadrature Simpsons rule 516 CA721214 JB January 27 1978 906 AM 2241 5 2241 2241 5 2241 2241 5 2241

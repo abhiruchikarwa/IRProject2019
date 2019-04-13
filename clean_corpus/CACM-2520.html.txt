@@ -1,0 +1,1 @@
+Greatest Common Divisor of n Integers and Multipliers Algorithm C386 CACM April 1973 Ragland L C Good D I proof of algorithms greatest common divisor Euclidean algorithm inductive assertion method 315 442 510 524 CA730408 JB January 24 1978 927 AM 2520 5 2520 2520 5 2520 2520 5 2520

@@ -1,0 +1,1 @@
+Evaluation of the Modified Bessel Functions K0Z and K1Z for Complex Arguments S17 Algorithm A484 CACM September 1974 Burrell K H Bessel functions Hankel functions modified Bessel functions Gauss-Hermite quadrature 512 CA740907 JB January 17 1978 847 AM 2601 5 2601 2601 5 2601 2601 5 2601

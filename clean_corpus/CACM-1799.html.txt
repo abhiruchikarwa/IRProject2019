@@ -1,0 +1,1 @@
+Elementary Functions by Continued Fractions Algorithm 229 B1 CACM December 1969 Bray T A continued factions Pade table 519 CA691213 JB February 15 1978 209 PM 1799 5 1799 1799 5 1799 1799 5 1799

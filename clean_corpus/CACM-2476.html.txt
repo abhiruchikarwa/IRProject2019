@@ -1,0 +1,1 @@
+Equivalence Between ANDOR Graphs and Context-Free Grammars CACM July 1973 Hall P A V artificial intelligence ANDOR graphs language theory context-free grammars 360 364 523 CA730710 JB January 23 1978 1121 AM 2476 5 2476 2476 5 2476 2476 5 2476

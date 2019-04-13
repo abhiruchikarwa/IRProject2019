@@ -1,0 +1,1 @@
+Exponential Integral Eix Algorithms 385 S13 CACM December 1970 Redish K A ANSI Fortran standard 40 422 CA701210 JB February 9 1978 304 PM 1953 5 1953 1953 5 1953 1953 5 1953
