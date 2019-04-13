@@ -75,7 +75,7 @@ class Helper:
     def get_queries(self):
 
         queries = defaultdict()
-        with open('../../data/cacm.query.txt', 'r') as f:
+        with open('../../../data/cacm.query.txt', 'r') as f:
 
             raw_data = f.read()
             bs = BeautifulSoup(raw_data, 'html.parser')
@@ -89,7 +89,7 @@ class Helper:
                 query = re.sub(r"[^0-9A-Za-z,-\.:\\$]", " ", query)
                 query = re.sub(r"(?!\d)[$,%,:.,-](?!\d)", " ", query, 0)
                 queries[query_id] = query.lower()
-        with open('../../data/queries.txt', 'w') as f:
+        with open('../../../data/queries.txt', 'w') as f:
             for key, value in queries.items():
                 f.write(str(key) + ' ' + value + '\n')
         f.close()

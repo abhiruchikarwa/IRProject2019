@@ -1,86 +1,88 @@
-from .. import Helper
-from collections import defaultdict
+from src.phase1 import Helper
+from collections import OrderedDict
 import math
-import operator
+import nltk
+import os
+
+QUERY_INPUT_FILE = 'queries.txt'
+OUTPUT_FILE_PATH = 'BM25_results/'
+
+## CONSTANTS (given in the assignment description)
+k1 = 1.2
+b = 0.75
+k2 = 100
 
 
-class BM25:
-    def __init__(self, k1=1.2,k2=100, b=0.75):
-        self.helper = Helper()
-        self.k1 = k1
-        self.k2 = k2
-        self.b = b
-        self.calcAVDL()
-        self.queryFrequencyDict = defaultdict(int)
-        self.docScoreDict = defaultdict(int)
-        self.main()
+def average_length_of_docs(docs):
+    sum = 0
+    for v in docs.values():
+        sum += v
+    return sum/len(docs)
 
+def get_BM25_score(N, ni, dl, K, fi, qfi):
+    # N : total number of documents in the corpus
+    # ni: total number of documents in which this term occurs
+    # dl: the document length of the document under consideration
+    # K : the value found for every document using formula  K = k1 * ((1 - b) + b * (dl/avdl))
+    # fi: term frequency of the term under consideration in the document under consideration
+    # qfi: frequency of the term in the query
+    # ri = R = 0 as no relevance information is assumed
+    # score = log (ri + 0.5)/(R − ri + 0.5)/(ni − ri + 0.5)/(N − ni − R + ri + 0.5) · (k1 + 1)fi / K + fi · (k2 + 1)qfi / k2 + qfi (source: Text book, Search Engines, information retrieval in practice)
+    partial_score = math.log(1/((ni - 0.5)/(N - ni - 0.5))) * (k1 + 1) * fi * (1 / (K + fi)) * (k2 + 1) * qfi * (1/(k2 + qfi))
+    return partial_score
 
-    def initializeDocScoreDict(self):
-        for key in self.helper.number_of_terms_doc.keys():
-            self.docScoreDict[key] = 0
-
-    def calculateK(self, doc_id):
-        retVal = self.k1*((1-self.b) + self.b*(self.helper.number_of_terms_doc[doc_id]/self.avdl))
-        return retVal
-
-    def calcAVDL(self):
-        sum = 0
-        for key in self.helper.number_of_terms_doc.keys():
-            sum += self.helper.number_of_terms_doc[key]
-            self.avdl = sum/len(self.helper.number_of_terms_doc.keys())
-
-    def calculateDocumentScore(self,term, doc_id, qId):
-        r = 0
-        R = 0
-        n = len(self.helper.unigram_inverted_index[term].keys())
-        N = len(self.helper.number_of_terms_doc.keys())
-        K = self.calculateK(doc_id)
-        f = self.helper.unigram_inverted_index[term][doc_id]
-        qf = self.queryFrequencyDict[term]
-        docScore = \
-            math.log(((r + 0.5)/(R - r + 0.5))/((n-r+0.5)/(N - n - R + r +0.5))
-                     *(((self.k1+1)*f)/(K + f))
-                     *(((self.k2 + 1)*qf)/(self.k2 + qf)))
-
-        self.docScoreDict[doc_id] += docScore
-
-
-    def createQueryFrequencyDict(self):
-        for term in self.query.split():
-            if term in self.queryFrequencyDict.keys():
-                self.queryFrequencyDict[term] += 1
+def get_top_100_relevant_documents(inverted_index, query, avdl):
+    # maintain a score list
+    score_list = dict()
+    document_term_count = h.document_term_count
+    N = len(h.document_term_count)
+    for term, freq in nltk.FreqDist(query.split()).items():  
+        # for each term in the query fetch and traverse the inverted list
+        if term not in inverted_index:
+            continue
+        inv_list = inverted_index[term]
+        for posting in inv_list:
+            dl = document_term_count[posting[0]]
+            # calculate the value of K for this document 
+            K = k1 * ((1 - b) + b * (dl/avdl))
+            # calculate the score for a document for that term
+            score = get_BM25_score(N, len(inv_list), dl, K, posting[1], freq)
+            # update the score in the score list for every document in the inverted list for the corresponding term in the query
+            if posting[0] in score_list:
+                score_list[posting[0]] += score
             else:
-                self.queryFrequencyDict[term] = 1
+                score_list[posting[0]] = score
+    return OrderedDict(sorted(score_list.items(), key = lambda item: item[1], reverse = True)[:100]) # 100 for top-100 results only
 
 
-    def calculateTermScore(self, term, qId):
-        for doc_id in self.helper.unigram_inverted_index[term]:
-            self.calculateDocumentScore(term, doc_id, qId)
+query_id = 1
 
+def process_query(query, inverted_index, avdl):
+    global query_id
+    # query = ' '.join(query.split(' ')[1:]).rstrip()
+    # fetch top relevant results
+    results = get_top_100_relevant_documents(inverted_index, query, avdl)
+    # write the results to a file
+    if not os.path.exists(OUTPUT_FILE_PATH):
+        os.makedirs(OUTPUT_FILE_PATH)
+    f_obj = open(OUTPUT_FILE_PATH + str(query_id) +'.txt', 'w', encoding='utf-8')
+    rank = 1
+    for docid, score in results.items():
+        f_obj.write(str(query_id) + " Q0 " + docid + " " + str(rank)  + " " + str(score) + " BM25" + '\n')
+        rank += 1
+    f_obj.close()
+    query_id += 1
 
-    def score(self, qId):
-        for term in self.query.split():
-            self.calculateTermScore(term, qId)
+def main():
+    # generate index and the vocab counts
 
-    def printScores(self, qId):
-        sortedDict = sorted(self.docScoreDict.items(), key=operator.itemgetter(1), reverse=True)
-        file = open("BM_Output/"+str(qId)+"-score.txt", "w")
-        rank = 0
-        for tup in sortedDict:
-            rank += 1
-            file.write(str(qId) + " Q0 " + str(tup[0]) + " " + str(rank) + " " + str(tup[1]) + " BM25NoStemNoStop\n")
-            if rank == 100:
-                break
-
-    def main(self):
-        queries = self.helper.get_queries()
-        for q in queries.keys():
-            self.query = queries[q]
-            self.query = self.helper.parse_query(self.query)
-            self.queryFrequencyDict = defaultdict(int)
-            self.docScoreDict = defaultdict(int)
-            self.createQueryFrequencyDict()
-            self.score(q)
-            self.printScores(q)
-b= BM25()
+    inverted_index = h.get_inverted_index()
+    # find the average length of docs in the index across the corpus.
+    avdl = average_length_of_docs(h.document_term_count)
+    # read queries
+    for query in h.get_queries().values():
+        process_query(query, inverted_index, avdl)
+        
+h = Helper.Helper()
+if __name__ == "__main__":
+    main()
