@@ -1,20 +1,20 @@
 from collections import defaultdict
 from os import listdir
 from os.path import isfile, join, dirname
-import nltk
 from bs4 import BeautifulSoup
 import time 
 import re
-from nltk.tokenize import word_tokenize
+import nltk
 
 
 class Helper:
     def __init__(self):
         self.ROOT_OUTPUT_FOLDER = dirname(dirname(dirname(__file__))) + "/clean_corpus/"
-        self.ROOT_INPUT_FOLDER =  dirname(dirname(dirname(__file__))) + "/data/cacm/"
+        self.ROOT_INPUT_FOLDER = dirname(dirname(dirname(__file__))) + "/data/cacm/"
+        self.queries = self.get_queries()
         self.total_number_of_terms_corpus = 0
         self.clean_dataset()
-         # maintain a global inverted index
+        # maintain a global inverted index
         self.inverted_index = dict()
         # maintain a map for document -> vocabulary count
         self.document_term_count = dict()
@@ -31,24 +31,24 @@ class Helper:
             count += 1
             # maintain a document-wide frequency distribution map
             freq_dist = nltk.FreqDist()
-            f_obj = open(join(self.ROOT_OUTPUT_FOLDER, f),'rb')
+            f_obj = open(join(self.ROOT_OUTPUT_FOLDER, f), 'rb')
             text = f_obj.read().decode('utf-8')
             # update the frequency distribution with the frequency distribution of unigrams in this document
             freq_dist.update(text.split())  # for uni-grams
-            for ngram ,frequency in freq_dist.items():
+            for ngram, frequency in freq_dist.items():
                 # add the ngram and a posting list for this document in the inverted index if not present
                 if ngram not in self.inverted_index:
                     self.inverted_index[ngram] = [(docID, frequency)]
-                # if ngram already present in the inverted index update the posting list with a posting for this document
+                # if ngram already present in the inverted index update the posting list
+                # with a posting for this document
                 else:
                     posting_list = self.inverted_index[ngram]
-                    posting_list.append((docID,frequency))
+                    posting_list.append((docID, frequency))
             if count == 1000:
                 break
-            #print(docID)
-            # update the document vocabulary for this document in the map    
-            self.document_term_count[docID] = len(text.split()) 
-        out_put_file = open('../unigrams_inverted_index.txt', 'w', encoding='utf-8') # for uni-grams
+            # update the document vocabulary for this document in the map
+            self.document_term_count[docID] = len(text.split())
+        out_put_file = open('../unigrams_inverted_index.txt', 'w', encoding='utf-8')  # for uni-grams
         # write the inverted index into the output file
         for k, v in self.inverted_index.items():
             out_put_file.write(k + ":" + str(v) + "\n")
@@ -67,7 +67,7 @@ class Helper:
         return corpus_term_count_dictionary
 
     def get_queries(self):
-        queries = {}
+        queries = defaultdict()
         with open('../../data/cacm.query.txt', 'r') as f:
             raw_data = f.read()
             bs = BeautifulSoup(raw_data, 'html.parser')
@@ -81,7 +81,12 @@ class Helper:
                 query = re.sub(r"[^0-9A-Za-z,-\.:\\$]", " ", query)
                 query = re.sub(r"(?!\d)[$,%,:.,-](?!\d)", " ", query, 0)
                 queries[query_id] = query.lower()
+        with open('../../data/queries.txt', 'w') as f:
+            for key, value in queries.items():
+                f.write(str(key) + ' ' + value + '\n')
+        f.close()
         return queries
+
     def __crawl(self, f):
         f_obj = open(join(self.ROOT_INPUT_FOLDER, f), "r")
         bs_object = BeautifulSoup(f_obj.read(), "html.parser")
@@ -89,7 +94,7 @@ class Helper:
         # retrieve the content from the pre tags in the files
         content_block = bs_object.find('pre') 
         text = content_block.get_text()
-        filtered_text =" ".join([re.sub('[^a-zA-Z0-9\s\r\n-]', '', word) for word in text.split()])
+        filtered_text = " ".join([re.sub('[^a-zA-Z0-9\s\r\n-]', '', word) for word in text.split()])
         output_file = open(self.ROOT_OUTPUT_FOLDER + f + ".txt", 'w')
         output_file.write(filtered_text)
         output_file.close()
@@ -102,13 +107,3 @@ class Helper:
             self.__crawl(f)
         end_time = time.time()
         print("This crawl took " + str(end_time - start_time) + " seconds to complete")
-
-def main():
-    h = Helper()
-    # queries = h.get_queries()
-    # with open('../../data/queries.txt', 'w') as f:
-    #     for key, value in queries.items():
-    #         f.write(str(key) + ': ' + value + '\n')
-    # f.close()
-
-main()
