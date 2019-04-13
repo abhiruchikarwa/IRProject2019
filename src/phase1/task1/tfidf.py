@@ -1,4 +1,4 @@
-from Helper import Helper
+from .. import Helper
 import math
 from collections import defaultdict
 import re
@@ -22,9 +22,9 @@ class TfIdf:
 	def printTF(self):
 		for entry in r.unigram_inverted_index:
 			for en in r.unigram_inverted_index[entry]:
-				print entry
-				print en
-				print r.unigram_inverted_index[entry][en]
+				print (entry)
+				print (en)
+				print (r.unigram_inverted_index[entry][en])
 		# number_terms_doc
 
 	def calculateDocumentFrequency(self):
@@ -58,7 +58,7 @@ class TfIdf:
 	def writeTfIdfScoreToFile(self,query,queryId,sorted_scores):
 		count = 1
 		file_name = 'TF-IDF_output/' + str(queryId) + '.txt'
-		print 'writing' + str(queryId)
+		print ('writing' + str(queryId))
 		
 		with open(file_name, 'w') as f:
 			for word in sorted_scores:

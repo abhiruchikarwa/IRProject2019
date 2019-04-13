@@ -1,5 +1,4 @@
-
-from Helper import Helper
+from .. import Helper
 import math
 from collections import defaultdict
 import operator
@@ -16,8 +15,8 @@ class JM_Retreiver:
     def run(self, query, query_id):
         query = self.helper.parse_query(query)
         terms = query.split()
-        print "query is", query
-        print "terms are", terms
+        print ("query is", query)
+        print ("terms are", terms)
         doc_scores = defaultdict(float)
         doc_list = []
         for term in terms:
@@ -27,8 +26,8 @@ class JM_Retreiver:
                     if doc_id not in doc_list:
                         doc_list.append(doc_id)
             else:
-                print term
-                print "term ignored not in corpus"
+                print (term)
+                print ("term ignored not in corpus")
 
         for term in terms:
             if term in self.unigram_inverted_index.keys():

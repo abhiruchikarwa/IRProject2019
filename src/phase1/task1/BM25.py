@@ -1,4 +1,4 @@
-from Helper import Helper
+from .. import Helper
 from collections import defaultdict
 import math
 import operator
