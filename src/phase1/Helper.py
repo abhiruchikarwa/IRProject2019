@@ -8,9 +8,11 @@ import nltk
 
 
 class Helper:
+
     def __init__(self):
         self.ROOT_OUTPUT_FOLDER = dirname(dirname(dirname(__file__))) + "/clean_corpus/"
         self.ROOT_INPUT_FOLDER = dirname(dirname(dirname(__file__))) + "/data/cacm/"
+
         self.queries = self.get_queries()
         self.total_number_of_terms_corpus = 0
         self.clean_dataset()
@@ -19,6 +21,9 @@ class Helper:
         # maintain a map for document -> vocabulary count
         self.document_term_count = dict()
         self.generate_inverted_index()
+
+    def get_inverted_index(self):
+        return self.inverted_index
 
     def generate_inverted_index(self):
         # fetch all file names
@@ -39,16 +44,16 @@ class Helper:
                 # add the ngram and a posting list for this document in the inverted index if not present
                 if ngram not in self.inverted_index:
                     self.inverted_index[ngram] = [(docID, frequency)]
-                # if ngram already present in the inverted index update the posting list
-                # with a posting for this document
                 else:
                     posting_list = self.inverted_index[ngram]
                     posting_list.append((docID, frequency))
             if count == 1000:
                 break
+
             # update the document vocabulary for this document in the map
             self.document_term_count[docID] = len(text.split())
         out_put_file = open('../unigrams_inverted_index.txt', 'w', encoding='utf-8')  # for uni-grams
+
         # write the inverted index into the output file
         for k, v in self.inverted_index.items():
             out_put_file.write(k + ":" + str(v) + "\n")
@@ -56,6 +61,7 @@ class Helper:
         # write the document vocabulary map in a separate output file
         for k, v in self.document_term_count.items():
             doc_vocab_length_file.write(k + ":" + str(v) + "\n")
+
 
     def corpus_frequency(self, unigram_inverted_index):
         corpus_term_count_dictionary = {}
@@ -67,8 +73,10 @@ class Helper:
         return corpus_term_count_dictionary
 
     def get_queries(self):
+
         queries = defaultdict()
         with open('../../data/cacm.query.txt', 'r') as f:
+
             raw_data = f.read()
             bs = BeautifulSoup(raw_data, 'html.parser')
             docs = bs.find_all('doc')
@@ -107,3 +115,14 @@ class Helper:
             self.__crawl(f)
         end_time = time.time()
         print("This crawl took " + str(end_time - start_time) + " seconds to complete")
+
+
+    def parse_query(self, query):
+        query = query.lower()
+        regex = r"(?!\d)[.,;](?!\d)"
+        regex2 = r"[(){}\"#~\[\]<>=:?!@&'|*]"
+        regex3 = r"(?!\d|\w)[-/$](?!\d|\w)"
+        query = re.sub(regex, "", query, 0)
+        query = re.sub(regex2, "", query, 0)
+        query = re.sub(regex3, "", query, 0)
+        return query

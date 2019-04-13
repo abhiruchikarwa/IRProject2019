@@ -6,9 +6,9 @@ import operator
 class JM_Retreiver:
     def __init__(self):
         self.helper = Helper()
-        self.unigram_inverted_index = self.helper.unigram_inverted_index
+        self.inverted_index = self.helper.unigram_inverted_index
         self.corpus_term_count = self.helper.corpus_frequency(
-            self.unigram_inverted_index)
+            self.inverted_index)
         self.CONSTANT = 0.35
         self.number_of_ranked_docs = 100
 
@@ -20,8 +20,8 @@ class JM_Retreiver:
         doc_scores = defaultdict(float)
         doc_list = []
         for term in terms:
-            if term in self.unigram_inverted_index.keys():
-                inverted_list = self.unigram_inverted_index[term]
+            if term in self.inverted_index.keys():
+                inverted_list = self.inverted_index[term]
                 for doc_id in inverted_list.keys():
                     if doc_id not in doc_list:
                         doc_list.append(doc_id)
@@ -30,7 +30,7 @@ class JM_Retreiver:
                 print ("term ignored not in corpus")
 
         for term in terms:
-            if term in self.unigram_inverted_index.keys():
+            if term in self.inverted_index.keys():
                 for doc_id in doc_list:
                     score = self.calculate_document_score(doc_id, term)
                     doc_scores[doc_id] += score
@@ -87,7 +87,7 @@ class JM_Retreiver:
 
     # fqi, D
     def get_number_of_occurence_in_document(self, term, doc_id):
-        documents_dict = self.unigram_inverted_index[term]
+        documents_dict = self.inverted_index[term]
         if doc_id in documents_dict.keys():
             return documents_dict[doc_id] * 1.0
         return 0
