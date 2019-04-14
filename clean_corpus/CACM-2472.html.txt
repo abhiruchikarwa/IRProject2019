@@ -1,1 +1,0 @@
-Minimal spanning Tree Algorithm R422 CACM July1973 Kernighan B W spanning tree minimal spanning tree Prim algorithm 532 CA730714 JB January 23 1978 1112 AM 2472 5 2472 2472 5 2472 2472 5 2472

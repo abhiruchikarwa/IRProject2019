@@ -1,1 +1,0 @@
-Evaluation of the Chebyshev Polynomial TnX by Recursion Algorithm CACM June 1960 Galler G M CA600608 JB March 20 1978 938 PM 182 5 182 182 5 182 182 5 182

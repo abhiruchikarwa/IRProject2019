@@ -1,1 +1,0 @@
-Least Squares Fit By fx  AcosBxC Algorithm 376 E2 CACM February 1970 Spath H nonlinear least squares fit 515 CA700214 JB February 14 1978 947 AM 2101 4 2101 2102 4 2101 1639 5 2101 2101 5 2101 2101 5 2101 2101 5 2101

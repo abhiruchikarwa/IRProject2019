@@ -1,1 +1,0 @@
-Finding All Cliques of an Undirected Graph Algorithm A457 CACM September 1973 Bron C Kerbosch J cliques maximal complete subgraphs clusters backtracking algorithm branch and bound technique recursion 371 532 CA730911 JB January 23 1978 844 AM 2444 5 2444 2444 5 2444 2444 5 2444

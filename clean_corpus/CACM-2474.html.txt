@@ -1,1 +1,0 @@
-DIFSUB for Solution of Ordinary Differential Equations Algorithm C407 CACM July 1973 Nikolai P J differential equations stiff differential equations boundary value problems 517 CA730712 JB January 23 1978 1116 AM 2205 4 2474 2474 4 2474 2474 4 2474 2205 5 2474 2207 5 2474 2474 5 2474 2474 5 2474 2474 5 2474

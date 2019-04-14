@@ -1,1 +1,0 @@
-Remarks on Characteristic Values and Associated Solutions of Mathieus Differential Equation Exponential Integral and Systems of Hyperbolic P Algorithms R352 R385 R392 CACM December 1972 Frisch M J ANSI Fortran standard 40 422 CA721219 JB January 27 1978 856 AM 2236 5 2236 2236 5 2236 2236 5 2236

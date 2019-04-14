@@ -1,1 +1,0 @@
-Binary Pattern Reconstruction from Projections Z Algorithm A445 CACM March 1973 Chang S pattern reconstruction image reconstruction data compression picture processing 363 530 CA730310 JB January 24 1978 1025 AM 2142 4 2529 2529 4 2529 2231 5 2529 2529 5 2529 2529 5 2529 2529 5 2529

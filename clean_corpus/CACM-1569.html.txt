@@ -1,1 +1,0 @@
-Implementing Phrase-Structure Productions in PLI A method is described for implementing the productions of a context-free phrase structure grammar in a PLI procedure whose structure and statements parallel the structure and notation of the grammar CACM July 1967 Irwin L CA670704 JB February 28 1978 901 AM 1569 5 1569 1569 5 1569 1569 5 1569

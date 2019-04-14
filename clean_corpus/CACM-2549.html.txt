@@ -1,1 +1,0 @@
-Random Deviates from the Dipole Distribution G5 Algorithm A441 CACM January 1973 Knop R E random number probability density probability distribution Dipole distribution Cauchy distribution simulation Monte Carlo 317 55 CA730112 JB January 24 1978 342 PM 2549 5 2549 2549 5 2549 2549 5 2549
