@@ -107,7 +107,7 @@ public class LuceneRun {
 			String query_id = query_array[0];
 			s = query_array[1];
 			TopScoreDocCollector collector = TopScoreDocCollector.create(100, true);
-			Query q = new QueryParser(Version.LUCENE_47, "contents", analyzer).parse(s);
+			Query q = new QueryParser(Version.LUCENE_47, "contents", analyzer).clean(s);
 			searcher.search(q, collector);
 			ScoreDoc[] hits = collector.topDocs().scoreDocs;
 

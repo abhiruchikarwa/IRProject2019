@@ -1,73 +1,63 @@
 from src.phase1 import Helper
-import math
+from math import log
 import collections
 import os
 
-r = Helper.Helper()
+
+class TFIDFRetriever:
+
+    def __init__(self, inverted_index, document_term_count, queries):
+        self.output_dir = 'TF_IDF_results/'
+        self.inverted_index = inverted_index
+        self.document_term_count = document_term_count
+        self.queries = queries
+
+    def get_tf_idf_score(self, tf, df, D, N):
+        idf = log(N/df+1) + 1
+        tf = tf/D
+        return tf * idf
+
+    def get_score_for_query(self, query):
+        final_score = dict()
+        terms = query.split()
+        for term in terms:
+            if term in self.inverted_index:
+                for doc in self.inverted_index[term]:
+                    tf = doc[1]
+                    df = len(self.inverted_index[term])
+                    D = self.document_term_count[doc[0]]
+                    N = len(self.document_term_count)
+                    score = self.get_tf_idf_score(tf, df, D, N)
+                    final_score[doc[0]] = score if doc[0] not in final_score.keys() else final_score[doc[0]] + score
+        return final_score
+
+    def run(self):
+        for query_id, query in self.queries.items():
+            # the variable c denotes rank
+            raw_scores = self.get_score_for_query(query)
+            ordered_scores = collections.OrderedDict(
+                sorted(raw_scores.items(), key=lambda item: item[1], reverse=True)[:100])
+            if not os.path.exists(self.output_dir):
+                os.makedirs(self.output_dir)
+            with open(self.output_dir + str(query_id) + '.txt', 'w') as output:
+                count = 1
+                for doc in ordered_scores:
+                    doc_name = doc.upper() + '.html'
+                    output.write(str(query_id) + " Q0 " + doc_name + " " + str(count)
+                                 + " " + str(ordered_scores[doc]) + " TF_IDF\n")
+                    count += 1
+            output.close()
 
 
-# This script implements the TF-IDF Model for ranking the documents for every query
-# and retrieving the top 100 documents from the ranked documents
+def main():
+    h = Helper.Helper()
 
-# Access Encoded Data Structures
-inverted_index = r.get_inverted_index()
-docID_documentLen = r.document_term_count
-query_dict = r.get_queries()
-query_list = list(query_dict.values())    # Contains all the queries required
+    inverted_index = h.get_inverted_index()
+    document_term_count = h.document_term_count
+    queries = h.get_queries()
 
-# idf = log(N/df)
-
-# dictionary of docID, bm25-score
-final_score = {}
+    tfidf = TFIDFRetriever(inverted_index, document_term_count, queries)
+    tfidf.run()
 
 
-# # this function implements by calculating and returning a score
-# based on the given arguments
-def tf_idf(tf, df, D):
-
-    N = len(docID_documentLen.keys())
-    idf = math.log(N/df+1) + 1
-    normalized_tf = tf/D
-    score = normalized_tf * idf
-
-    return score
-
-
-# this function is used calculate the score for every document and calls the tf-idf function
-def calc_score(q):
-    final_score = {}
-    terms = q.split()
-    for term in terms:
-        if term in inverted_index:
-            for doc in inverted_index[term]:
-                if doc[0] not in final_score.keys():
-                    final_score[doc[0]] = tf_idf(doc[1],len(inverted_index[term]), docID_documentLen[doc[0]])
-                else:
-                    final_score[doc[0]] += tf_idf(doc[1],len(inverted_index[term]), docID_documentLen[doc[0]])
-
-    return final_score
-
-
-
-def print_in_file(all_files, output):
-    for file in all_files:
-        output.write(file + ": " + str(all_files[file]) + "\n")
-
-i = 1
-for query in query_list:
-    # the variable c denotes rank
-    # print("Calculating TF-IDF Normalized Score for query: " + query)
-    tf_idf_score = calc_score(query)
-    final_score1 = collections.OrderedDict(sorted(tf_idf_score.items(), key=lambda s: s[1], reverse=True)[:100])
-    newpath = r'TF_IDF/'
-    if not os.path.exists(newpath):
-        os.makedirs(newpath)
-    output = open(
-        newpath + str(i) + '.txt', 'w')
-
-    srno = 1
-    for file in final_score1:
-        output.write(str(i) + " Q0 " + file + " " + str(srno) + " " + str(final_score1[file]) + " TF_IDF" +"\n")
-        srno += 1
-    output.close()
-    i += 1
+main()

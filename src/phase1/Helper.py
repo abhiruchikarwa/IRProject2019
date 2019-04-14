@@ -1,6 +1,8 @@
 from collections import defaultdict
-from os.path import join, dirname
+from os.path import join, dirname, isfile
+from os import listdir
 from bs4 import BeautifulSoup
+import time
 
 import re
 import os
@@ -18,7 +20,7 @@ class Helper:
         self.parsed_queries_file = self.start_path + 'queries.txt'
 
         self.queries = dict()
-        self.total_number_of_terms_corpus = 0
+        self.total_number_of_terms_corpus = 0                   
         # maintain a global inverted index
         self.inverted_index = dict()
         # maintain a map for document -> vocabulary count
@@ -91,12 +93,12 @@ class Helper:
 
     def parse_query(self, query):
         query = query.lower()
-        regex = r"(?!\d)[.,;](?!\d)"
-        regex2 = r"[(){}\"#~\[\]<>=:?!@&'|*]"
-        regex3 = r"(?!\d|\w)[-/$](?!\d|\w)"
-        query = re.sub(regex, "", query, 0)
-        query = re.sub(regex2, "", query, 0)
-        query = re.sub(regex3, "", query, 0)
+        regex_for_decimal_digits = r"(?!\d)[.,;](?!\d)"
+        regex_for_brackets_and_special_characters = r"[(){}\"#~\[\]<>=:?!@&'|*]"
+        regex_for_hypenated_words = r"(?!\d|\w)[-/$](?!\d|\w)"
+        query = re.sub(regex_for_decimal_digits, "", query, 0)
+        query = re.sub(regex_for_brackets_and_special_characters, "", query, 0)
+        query = re.sub(regex_for_hypenated_words, "", query, 0)
         return query
 
     def get_inverted_index(self):
@@ -113,44 +115,30 @@ class Preprocessor:
         self.clean_corpus_dir = self.start_path + 'clean_corpus/'
         self.text_data = ''
 
-    def clean_and_save(self):
-        for file in os.listdir(self.raw_corpus_dir):
-            file_path = self.raw_corpus_dir + file
-            with open(file_path, 'r+') as f:
-                raw_data = f.read()
-            f.close()
-            bs = BeautifulSoup(raw_data, 'html.parser')
-            self.text_data = ''
-            pre = bs.find('pre')
-            self.text_data = pre.get_text()
-            self.remove_punctuation_in_data()
+    def __crawl(self, f):
+        f_obj = open(join(self.raw_corpus_dir, f), "r")
+        bs_object = BeautifulSoup(f_obj.read(), "html.parser")    
+        # retrieve the content from the pre tags in the files
+        content_block = bs_object.find('pre') 
+        text = content_block.get_text().lower()
+        words = []
+        for word in text.split():
+            if word == "pm" or word == "am":
+                words.append(word)
+                break    
+            word = re.sub(r"(?!\d)[.,;](?!\d)|(?!\d|\w)[-/$](?!\d|\w)|[(){}\"#~\[\]<>=?!@&'|*]|(?!\w):(?!\w)", '', word)
+            words.append(word)
+        filtered_text = " ".join(words)
+        f = f.replace('html', 'txt')
+        output_file = open(self.clean_corpus_dir + f, 'w')
+        output_file.write(filtered_text)
+        output_file.close()
 
-            if ' PM' in self.text_data:
-                self.text_data = self.text_data.split(' PM')[0] + ' PM'
-            elif ' AM' in self.text_data:
-                self.text_data = self.text_data.split(' AM')[0] + ' AM'
-
-            # store data
-            self.save_clean_file(file)
-
-    def remove_punctuation_in_data(self):
-        regex = r"(?!\d)[.,:;](?!\d)"
-        regex2 = r"[(){}\"#~\[\]<>=?!@&'|*]"
-        regex3 = r"(?!\d|\w)[-/$](?!\d|\w)"
-        self.text_data = re.sub(regex, "", self.text_data, 0)
-        self.text_data = re.sub(regex2, "", self.text_data, 0)
-        self.text_data = re.sub(regex3, "", self.text_data, 0)
-
-    def save_clean_file(self, file_name):
-        file_name = file_name.replace('html', 'txt')
-        file_name = (self.clean_corpus_dir + file_name).lower()
-        with open(file_name, 'w') as f:
-            f.write(self.text_data.lower())
-        f.close()
-
-
-def main():
-    h = Helper()
-
-
-main()
+    def clean_dataset(self):
+        print("crawling... this might take some time!")
+        start_time = time.time()
+        files = [f for f in listdir(self.raw_corpus_dir) if isfile(join(self.raw_corpus_dir, f))]
+        for f in files:
+            self.__crawl(f)
+        end_time = time.time()
+        print("This crawl took " + str(end_time - start_time) + " seconds to complete")

@@ -1,106 +1,81 @@
-from .. import Helper
 import math
-from collections import defaultdict
 import operator
 
+from src.phase1 import Helper
+from collections import defaultdict
 
-class JM_Retreiver:
+
+class JMRetriever:
     def __init__(self):
-        self.helper = Helper()
-        self.inverted_index = self.helper.unigram_inverted_index
-        self.corpus_term_count = self.helper.corpus_frequency(self.inverted_index)
-        self.CONSTANT = 0.35
+        self.helper = Helper.Helper()
+        self.inverted_index = self.helper.get_inverted_index()
+        self.corpus_term_count = self.helper.corpus_frequency()
+        self.lambda_value = 0.35
         self.number_of_ranked_docs = 100
+        self.output_folder = 'JM_QLM_results/'
 
     def run(self, query, query_id):
         query = self.helper.parse_query(query)
         terms = query.split()
-        print ("query is", query)
-        print ("terms are", terms)
         doc_scores = defaultdict(float)
-        doc_list = []
         for term in terms:
             if term in self.inverted_index.keys():
-                inverted_list = self.inverted_index[term]
-                for doc_id in inverted_list.keys():
-                    if doc_id not in doc_list:
-                        doc_list.append(doc_id)
-            else:
-                print (term)
-                print ("term ignored not in corpus")
+                posting_list = self.inverted_index[term]
+                for posting in posting_list:
+                    doc_id = posting[0]
+                    doc_scores[doc_id] += self.calculate_document_score(doc_id, term)
 
-        for term in terms:
-            if term in self.inverted_index.keys():
-                for doc_id in doc_list:
-                    score = self.calculate_document_score(doc_id, term)
-                    doc_scores[doc_id] += score
+            sorted_scores = sorted(doc_scores.items(), key=operator.itemgetter(1), reverse=True)
+            self.save_results(query_id, sorted_scores)
 
-            self.sort_scores(query, query_id, doc_scores)
-
-    def sort_scores(self, query, query_id, doc_scores):
-        sorted_scores = sorted(
-            doc_scores.items(), key=operator.itemgetter(1), reverse=True)
-        self.save_to_file(query, query_id, sorted_scores)
-
-    
-
-    def save_to_file(self, query, query_id, tf_dict):
+    def save_results(self, query_id, scored_docs):
         count = 1
-        file_name = 'JM_output/' + str(query_id) + '.txt'
+        file_name = self.output_folder + str(query_id) + '.txt'
         
         with open(file_name, 'w') as f:
-            for word in tf_dict:
-                if count <= self.number_of_ranked_docs:
-                    f.write(str(query_id))
-                    f.write(" ")
-                    f.write("Q0")
-                    f.write(" ")
-                    f.write(word[0])
-                    f.write(" ")
-                    f.write(str(count))
-                    f.write(" ")
-                    f.write(str(word[1]))
-                    f.write(" ")
-                    f.write("LM_JM_Unigram_Casefolding_PunctuationHandling")
-                    f.write("\n")
+            for doc in scored_docs:
+                doc_name = doc[0].upper() + '.html'
+                if count <= 100:
+                    f.write(str(query_id) + " Q0 " + doc_name + " " + str(count) + " " + str(doc[1]) +
+                            " JM_Smoothed_Query_Likelihood_Model\n")
                     count += 1
                 else:
                     break
 
     def calculate_document_score(self, doc_id, term):
-        first_term = (1 - self.CONSTANT) * (self.get_number_of_occurence_in_document(term,doc_id) / self.get_total_number_of_terms_in_document(doc_id))
-        second_term = self.CONSTANT * ( self.number_of_occurence_in_corpus(term) / self.get_total_number_of_terms_in_corpus())
-        score = math.log((first_term + second_term))
-        return score
-        
-    # Cqi
-    def number_of_occurence_in_corpus(self, term):
-        return self.corpus_term_count[term] * 1.0
+        # fqi, D
+        term_df = self.get_term_df(term, doc_id)
 
-    # |C|
-    def get_total_number_of_terms_in_corpus(self):
-        return self.helper.total_number_of_terms_corpus * 1.0
+        # |D|
+        doc_term_count = self.helper.document_term_count[doc_id] * 1.0
 
-    # |D|
-    def get_total_number_of_terms_in_document(self, doc_id):
-        return self.helper.number_of_terms_doc[doc_id] * 1.0
+        # Cqi
+        total_term_frequency = self.corpus_term_count[term] * 1.0
 
-    # fqi, D
-    def get_number_of_occurence_in_document(self, term, doc_id):
-        documents_dict = self.inverted_index[term]
-        if doc_id in documents_dict.keys():
-            return documents_dict[doc_id] * 1.0
-        return 0
+        # |C|
+        # total_term_count = self.helper.total_number_of_terms_corpus * 1.0
+        total_term_count = len(self.inverted_index) * 1.0
 
-    def JM_test(self):
+        lm_probability = ((1 - self.lambda_value) * (term_df / doc_term_count))
+        cm_probability = (self.lambda_value * (total_term_frequency / total_term_count))
+        return math.log(lm_probability + cm_probability)
+
+    def get_term_df(self, term, doc_id):
+        posting_list = self.inverted_index[term]
+        for posting in posting_list:
+            if doc_id == posting[0]:
+                return posting[1] * 1.0
+        return 0.0
+
+    def main(self):
         queries = self.helper.get_queries()
-        for key in queries.keys():
-            self.run(queries[key], key)
+        for query_id, query in queries.items():
+            self.run(query, query_id)
 
 
 def main():
-    j = JM_Retreiver()
-    j.JM_test()
+    j = JMRetriever()
+    j.main()
 
 
 main()
