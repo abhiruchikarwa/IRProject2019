@@ -5,7 +5,8 @@ from os.path import isfile, join, dirname
 from src.phase1.task2 import inverted_indexer
 from src.phase1 import Helper
 
-OUTPUT_FILE = dirname(dirname(__file__)) + "/terms_for_expansion.txt"
+OUTPUT_FILE = dirname(__file__) + "/Query Expansion/terms_for_expansion.txt"
+
 INITIAL_INDEX_FOLDER = dirname(__file__) + "/inverted_indexes/"
 
 
@@ -48,7 +49,7 @@ class QueryExpander:
         # fetch query from queries.txt here
         h = Helper.Helper()
         queries = h.get_queries()
-        query = queries[query]
+        query = queries[int(query)]
         term_frequency_table = self.generate_term_frequency_table(inverted_index)
         document_frequency_table = self.generate_document_frequency_table(inverted_index)
         terms = self.find_candidate_expansion_terms(query, document_frequency_table, term_frequency_table)
