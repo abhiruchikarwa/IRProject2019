@@ -3,7 +3,6 @@ from os.path import join, dirname, isfile
 from os import listdir
 from bs4 import BeautifulSoup
 import time
-
 import re
 import os
 import nltk
@@ -76,14 +75,13 @@ class Helper:
     def parse_queries(self):
         queries = defaultdict()
         with open(self.raw_queries_file, 'r') as f:
-            raw_data = f.read()
-            bs = BeautifulSoup(raw_data, 'html.parser')
+            bs = BeautifulSoup(f.read(), 'html.parser')
             docs = bs.find_all('doc')
             for doc in docs:
                 line_list = doc.get_text().replace("\n", '').split()
                 query_id = int(line_list.pop(0))
-                query = ' '.join(line_list)
-                queries[query_id] = self.parse_query(query)
+                query = ' '.join(line_list).lower()
+                queries[query_id] = clean_text(query)
 
         with open(self.parsed_queries_file, 'w') as f:
             for key, value in queries.items():
@@ -91,21 +89,15 @@ class Helper:
         f.close()
         self.queries = queries
 
-    def parse_query(self, query):
-        query = query.lower()
-        regex_for_decimal_digits = r"(?!\d)[.,;](?!\d)"
-        regex_for_brackets_and_special_characters = r"[(){}\"#~\[\]<>=:?!@&'|*]"
-        regex_for_hypenated_words = r"(?!\d|\w)[-/$](?!\d|\w)"
-        query = re.sub(regex_for_decimal_digits, "", query, 0)
-        query = re.sub(regex_for_brackets_and_special_characters, "", query, 0)
-        query = re.sub(regex_for_hypenated_words, "", query, 0)
-        return query
-
     def get_inverted_index(self):
         return self.inverted_index
 
     def get_queries(self):
         return self.queries
+
+
+def clean_text(text):
+    return re.sub(r"(?!\d)[.,;](?!\d)|(?!\d|\w)[-/$](?!\d|\w)|[(){}\"#~\[\]<>=:?!@&'|*]|(?!\w):(?!\w)", '', text)
 
 
 class Preprocessor:
@@ -126,7 +118,7 @@ class Preprocessor:
             if word == "pm" or word == "am":
                 words.append(word)
                 break    
-            word = re.sub(r"(?!\d)[.,;](?!\d)|(?!\d|\w)[-/$](?!\d|\w)|[(){}\"#~\[\]<>=?!@&'|*]|(?!\w):(?!\w)", '', word)
+            word = clean_text(word)
             words.append(word)
         filtered_text = " ".join(words)
         f = f.replace('html', 'txt')
@@ -142,3 +134,4 @@ class Preprocessor:
             self.__crawl(f)
         end_time = time.time()
         print("This crawl took " + str(end_time - start_time) + " seconds to complete")
+

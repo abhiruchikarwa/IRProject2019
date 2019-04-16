@@ -76,6 +76,7 @@ class BM25Retriever:
         f_obj.close()
 
 
+
 def main():
     h = Helper.Helper()
     # generate index and the vocab counts
