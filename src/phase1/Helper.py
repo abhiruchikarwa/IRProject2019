@@ -78,7 +78,7 @@ class Helper:
             bs = BeautifulSoup(f.read(), 'html.parser')
             docs = bs.find_all('doc')
             for doc in docs:
-                line_list = doc.get_text().replace("\n", '').split()
+                line_list = doc.get_text().replace("\n", ' ').split()
                 query_id = int(line_list.pop(0))
                 query = ' '.join(line_list).lower()
                 queries[query_id] = clean_text(query)
@@ -134,4 +134,3 @@ class Preprocessor:
             self.__crawl(f)
         end_time = time.time()
         print("This crawl took " + str(end_time - start_time) + " seconds to complete")
-

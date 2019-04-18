@@ -1,21 +1,18 @@
 from collections import OrderedDict
-from nltk.corpus import stopwords
 from os import listdir
 from os.path import isfile, join, dirname
-from src.phase1.task2 import inverted_indexer
-from src.phase1 import Helper
-
-OUTPUT_FILE = dirname(__file__) + "/Query Expansion/terms_for_expansion.txt"
-
-INITIAL_INDEX_FOLDER = dirname(__file__) + "/inverted_indexes/"
+from src.phase3 import inverted_indexer
 
 
-class QueryExpander:
-
+class InvertedIndexHelper:
     def __init__(self):
-        self.INDEX_FILE = "unigrams_inverted_index.txt"
-        self.K = 10
-        self.N = 8
+        self.START_PATH = dirname(dirname(dirname(__file__))) + '/data/'
+        self.QUERIES_FILE = self.START_PATH + 'queries.txt'
+
+        self.queries = dict()
+        self.inverted_index = dict()
+        self.term_frequency_table = dict()
+        self.doc_frequency_table = dict()
 
     def get_inverted_index_from_file(self, file):
         f = open(file, 'r')
@@ -23,16 +20,19 @@ class QueryExpander:
         for line in f:
             (term, posting_list) = line.split('::')
             inverted_index[term] = eval(posting_list)
+        self.inverted_index = inverted_index
         return inverted_index
 
     def generate_term_frequency_table(self, inverted_index):
-        term_frequency_table = dict()
+        raw_tf_table = dict()
         for ngram, posting_list in inverted_index.items():
             term_freq = 0
             for posting in posting_list:
                 term_freq += posting[1]
-            term_frequency_table[ngram] = term_freq
-        return OrderedDict(sorted(term_frequency_table.items(), key=lambda item: item[1], reverse=True))
+            raw_tf_table[ngram] = term_freq
+        self.term_frequency_table = OrderedDict(sorted(raw_tf_table.items(),
+                                                       key=lambda item: item[1], reverse=True))
+        return self.term_frequency_table
 
     def generate_document_frequency_table(self, inverted_index):
         document_frequency_table = dict()
@@ -41,24 +41,41 @@ class QueryExpander:
             for posting in posting_list:
                 doc_ids.add(posting[0])
             document_frequency_table[ngram] = [doc_ids, len(posting_list)]
-        return OrderedDict(sorted(document_frequency_table.items(), key=lambda item: item[0]))
+        self.doc_frequency_table = OrderedDict(sorted(document_frequency_table.items(),
+                                                      key=lambda item: item[0]))
+        return self.doc_frequency_table
+
+    def get_queries(self):
+        with open(self.QUERIES_FILE, 'r') as f:
+            raw_queries = f.read().splitlines()
+        for q in raw_queries:
+            (q_id, query) = q.split(' ', 1)
+            self.queries[q_id] = query
+        return self.queries
+
+
+class QueryExpander:
+
+    def __init__(self):
+        self.output_file = dirname(__file__) + "/expanded_queries.txt"
+
+        self.K = 10
+        self.N = 8
+        self.index_helper = InvertedIndexHelper()
+        self.queries = self.index_helper.get_queries()
 
     def generate_corpus_statistics(self, f):
-        inverted_index = self.get_inverted_index_from_file(f)
-        query = f[:-4].split('_')[-1]
-        # fetch query from queries.txt here
-        h = Helper.Helper()
-        queries = h.get_queries()
-        query = queries[int(query)]
-        document_frequency_table = self.generate_document_frequency_table(inverted_index)
+        inverted_index = self.index_helper.get_inverted_index_from_file(f)
+        query_id = f[:-4].split('_')[-1]
+
+        query = self.queries.get(query_id)
+        document_frequency_table = self.index_helper.generate_document_frequency_table(inverted_index)
         terms = self.find_candidate_expansion_terms(query, document_frequency_table)
-        f_obj = open(OUTPUT_FILE, 'a')
-        f_obj.write('\nquery: ' + query + ' :\n')
-        f_obj.write('Terms: ' + ' '.join(list(terms.keys())[:self.N]))
+        with open(self.output_file, 'a') as f_obj:
+            f_obj.write(query_id + ' ' + query + ' ' + ' '.join(list(terms.keys())[:self.N]) + '\n')
         f_obj.close()
 
     def find_candidate_expansion_terms(self, query, doc_freq_table):
-        print('finding expansion terms for query: ' + query)
         # maintain a dictionary to store the dice's coefficient for the terms in the index with the query terms
         dice_coefficients = dict()
         for q_term in query.lower().split():
@@ -66,7 +83,7 @@ class QueryExpander:
                 continue
             q_docs = doc_freq_table[q_term][0]
             for term, docs in doc_freq_table.items():
-                if term in stopwords.words('english') or term in query.lower().split() or len(term) < 4:
+                if term in query.lower().split():
                     continue
                 # accumulate the dice's coefficients for the terms in the corpus for every term in the query
                 if term not in dice_coefficients:
@@ -79,18 +96,16 @@ class QueryExpander:
 
 
 def main():
-    # generate inverted index over all the documents in a file for a query   
+    # generate inverted index over all the documents in a file for a query
+    temp_index_dir = dirname(__file__) + "/inverted_indexes/"
+
     indexer = inverted_indexer.Indexer()
     query_expander = QueryExpander()
     indexer.generate_inverted_index(query_expander.K)
     # iterate through all files to find the candidate expansion terms for the corresponding query
-    files = [f for f in listdir(INITIAL_INDEX_FOLDER) if isfile(join(INITIAL_INDEX_FOLDER, f))]
-    f_obj = open(OUTPUT_FILE, 'w')
-    f_obj.write('The terms chosen for expansion for queries are:'
-                '(when K = ' + str(query_expander.K) + ' and N = ' + str(query_expander.N) + ')\n')
-    f_obj.close()
+    files = [f for f in listdir(temp_index_dir) if isfile(join(temp_index_dir, f))]
     for f in files:
-        f = join(INITIAL_INDEX_FOLDER, f)
+        f = join(temp_index_dir, f)
         query_expander.generate_corpus_statistics(f)
 
 
