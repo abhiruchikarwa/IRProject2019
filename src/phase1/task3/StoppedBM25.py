@@ -1,14 +1,14 @@
-from src.phase1.task3 import StemmedHelper
+from src.phase1.task3 import StoppedHelper
 from collections import OrderedDict
 import math
 import nltk
 import os
 
 
-class StemBM25:
+class BM25Retriever:
     def __init__(self):
         # CONSTANTS (given in the assignment description)
-        self.output_dir = 'Stemmed_BM25_results/'
+        self.output_dir = 'Stopped_BM25_results/'
         self.k1 = 1.2
         self.b = 0.75
         self.k2 = 100
@@ -77,13 +77,13 @@ class StemBM25:
 
 
 def main():
-    h = StemmedHelper.Helper()
+    h = StoppedHelper.StoppedHelper()
     # generate index and the vocab counts
     inverted_index = h.get_inverted_index()
     document_term_count = h.document_term_count
     queries = h.get_queries()
 
-    bm25 = StemBM25()
+    bm25 = BM25Retriever()
     # find the average length of docs in the index across the corpus.
     avdl = bm25.average_length_of_docs(document_term_count)
     # read queries
