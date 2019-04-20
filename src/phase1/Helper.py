@@ -55,7 +55,7 @@ class Helper:
         # for uni-grams
         with open(self.unigrams_file, 'w', encoding='utf-8') as unigram_output:
             for k, v in self.inverted_index.items():
-                unigram_output.write(k + ":" + str(v) + "\n")
+                unigram_output.write(k + "::" + str(v) + "\n")
         unigram_output.close()
 
         # for term-count
