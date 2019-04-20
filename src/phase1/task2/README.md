@@ -3,11 +3,12 @@
 ## Query Expansion
 This folder contains implementations for the two query expansion techniques:
 1. Query Expansion using Pseudo Relevance Feedback (QE-PRF)
-2. Query Expansion using Thesaurus (QE-T)
+2. Query Expansion using Thesaurus (QE-T) and,
+3. runner.py - contains code for running the retrieval again with the expanded queries 
 
 ### Requirements for QE-PRF:
  - nltk (`pip3 install nltk`) 
- 
+ - make sure you have the `Query Expansion/` folder created at the same level as this file 
 ### For running QE-PRF, do:
     `python3 queryexpansion_PRF.py`
     
@@ -29,18 +30,25 @@ Design Choices:
     - for the choice of data structures we have used sets in the document frequency table so that the look up operations are efficient.
     - Here we add N additional terms to the query while expanding it    
     
-Requirements for QE-T:
- - nltk (`pip3 install nltk`) 
+### Requirements for QE-T:
+ - nltk (`pip3 install nltk`)
+ - make sure you have the `Query Expansion/` folder created at the same level as this file 
+
  
-For running QE-PRF, do:
+### For running QE-PRF, do:
     `python3 query_expansion_using_thesaurus.py`
 
-References:
+### References:
  - https://pythonprogramming.net/wordnet-nltk-tutorial/ 
  - http://wordnetweb.princeton.edu/perl/webwn  
  
-Design choices:
+### Design choices:
 - For Query expansion in QE-T the basic idea is expanding the query using the synonyms of the query words. We use nltk.wordnet for this
 - One decision here is that we consider only top 3 unique lemmas for a query terms so that all query terms get equal chance of expansion
- 
+
+### Requirements for runner.py
+- nltk (`pip3 install nltk`)
+- make sure you have the `BM_Results_after_qe_PRF/` folder to store the results 
+- make sure you have the `BM_Results_after_qe_thesauri/` folder to store the results 
+
  
