@@ -13,7 +13,6 @@ INITIAL_INDEX_FOLDER = dirname(__file__) + "/inverted_indexes/"
 class QueryExpander:
 
     def __init__(self):
-        self.INDEX_FILE = "unigrams_inverted_index.txt"
         self.K = 10
         self.N = 8
 

@@ -1,3 +1,5 @@
+# We have referred https://pythonprogramming.net/wordnet-nltk-tutorial/ for this task
+
 import string
 import nltk
 from nltk.corpus import wordnet
@@ -25,24 +27,24 @@ i = 1
 for query in queries:
     query = query.lower()
     query = query.translate(str.maketrans('', '', string.punctuation))
-    word_tokens = word_tokenize(query)
-    filtered_sentence = [w for w in word_tokens if w not in stop_words]
+    query_tokens = word_tokenize(query)
+    filtered_query = [w for w in query_tokens if w not in stop_words]
 
     synonyms = []
-
     count = 0
-    for x in filtered_sentence:
-        for syn in wordnet.synsets(x):
-            for l in syn.lemmas():
+    for word in filtered_query:
+        for syn in wordnet.synsets(word):
+            for lemma in syn.lemmas():
+                # choose only 3 unique lemmas to get three synonyms for every term
                 if count < 3:
-                    if l.name() not in synonyms:
-                        synonyms.append(l.name())
+                    if lemma.name() not in synonyms:
+                        synonyms.append(lemma.name())
                         count += 1
 
         count = 0
 
-    synonyms_string = ' '.join(synonyms[:additional_query_terms] + filtered_sentence)
-    fout.write(str(i) + " " + synonyms_string + '\n')
+    expanded_query = ' '.join(synonyms[:additional_query_terms] + filtered_query)
+    fout.write(str(i) + " " + expanded_query + '\n')
     i += 1
 
 fout.close()
