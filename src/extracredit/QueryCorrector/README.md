@@ -4,6 +4,8 @@
 - Input the query you want to correct.
 - The input statement stops if you enter the string `'q'`
 
+#### Design Choices 
+- In this task, we are 
 
 #### References
 1. Search Engines by W. B. Croft, D. Metzler, T. Strohman
