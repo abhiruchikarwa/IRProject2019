@@ -1,2 +1,0 @@
-1. remove main from Helper
-2. remove dummy README
