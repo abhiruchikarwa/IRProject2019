@@ -2,14 +2,15 @@
 
 import string
 import nltk
+nltk.download('stopwords')
+nltk.download('punkt')
+nltk.download('wordnet')
 from nltk.corpus import wordnet
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 from src.phase1 import Helper
 import os
-nltk.download('stopwords')
-nltk.download('punkt')
-nltk.download('wordnet')
+
 additional_query_terms = 8
 
 h = Helper.Helper()
