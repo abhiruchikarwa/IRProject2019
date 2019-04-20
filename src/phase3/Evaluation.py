@@ -49,22 +49,25 @@ class Evaluator:
                 rel_count += 1
                 precision = rel_count / runner
                 sum_precision += precision
-        return sum_precision / len(self.__relevance_values[query_id])
+
+        if rel_count != 0:
+            return sum_precision / rel_count
+        return 0
 
     def __precision_at_k(self, query_id, k):
         rel_count = 0
-        runner = 0
+        runner = 1
         for doc in self.__retrieved_values[query_id]:
             if runner > k:
                 break
-            runner += 1
             if doc in self.__relevance_values[query_id]:
                 rel_count += 1
+            runner += 1
         return rel_count / k
 
     def __reciprocal_rank(self, query_id):
+        rank = 1
         for doc in self.__retrieved_values[query_id]:
-            rank = 1
             if doc in self.__relevance_values[query_id]:
                 return 1 / rank
             rank += 1
@@ -72,25 +75,25 @@ class Evaluator:
 
     @staticmethod
     def __print_table_format(query_id, out_obj):
-        print('\n Query ID: ' + query_id)
+        # print('\n Query ID: ' + query_id)
         out_obj.write('\n Query ID: ' + query_id + '\n')
-        dash = "-" * 812
-        print(dash)
-        out_obj.write(dash + '\n')
-        print('{:<12}'.format(" Rank "), end='|')
+        table_boundaries = "-" * 812
+        # print(table_boundaries)
+        out_obj.write(table_boundaries + '\n')
+        # print('{:<12}'.format(" Rank "), end='|')
         out_obj.write('{:<12}'.format(" Rank "))
         out_obj.write('|')
         for i in range(1, 101):
-            print("{:^7d}".format(i), end='|')
+            # print("{:^7d}".format(i), end='|')
             out_obj.write("{:^7d}".format(i))
             out_obj.write('|')
-        print('\n' + dash)
-        out_obj.write('\n' + dash + '\n')
+        # print('\n' + table_boundaries)
+        out_obj.write('\n' + table_boundaries + '\n')
 
     def __print_precision(self, query_id, out_obj):
         rel_count = 0
         runner = 0
-        print('{:<12}'.format(" Precision "), end='|')
+        # print('{:<12}'.format(" Precision "), end='|')
         out_obj.write('{:<12}'.format(" Precision "))
         out_obj.write('|')
         for doc in self.__retrieved_values[query_id]:
@@ -99,16 +102,16 @@ class Evaluator:
                 rel_count += 1
             precision = rel_count / runner
             # recall = rel_count / len(self.__relevance_values[query_id])
-            print("{:^7.2f}".format(precision), end='|')
+            # print("{:^7.2f}".format(precision), end='|')
             out_obj.write("{:^7.2f}".format(precision))
             out_obj.write('|')
-        print('\n')
+        # print('\n')
         out_obj.write('\n')
 
     def __print_recall(self, query_id, out_obj):
         rel_count = 0
         runner = 0
-        print('{:<12}'.format(" Recall "), end='|')
+        # print('{:<12}'.format(" Recall "), end='|')
         out_obj.write('{:<12}'.format(" Recall "))
         out_obj.write('|')
         for doc in self.__retrieved_values[query_id]:
@@ -116,10 +119,10 @@ class Evaluator:
             if doc in self.__relevance_values[query_id]:
                 rel_count += 1
             recall = rel_count / len(self.__relevance_values[query_id])
-            print("{:^7.2f}".format(recall), end='|')
+            # print("{:^7.2f}".format(recall), end='|')
             out_obj.write("{:^7.2f}".format(recall))
             out_obj.write('|')
-        print('\n')
+        # print('\n')
         out_obj.write('\n')
 
     def mean_average_precision(self):
@@ -155,15 +158,15 @@ def main():
         e = Evaluator(folder_path)
         file_name = folder_path.split('\\')[-1]
         out_obj = open('evaluations/'+file_name+'_evaluations.txt', 'w')
-        print("The Mean average precision for the results is : " + str(e.mean_average_precision()))
+        # print("The Mean average precision for the results is : " + str(e.mean_average_precision()))
         out_obj.write("The Mean average precision for the results is : " + str(e.mean_average_precision())+ '\n')
-        print("The Mean reciprocal rank precision for the results is : " + str(e.mean_reciprocal_rank()))
+        # print("The Mean reciprocal rank precision for the results is : " + str(e.mean_reciprocal_rank()))
         out_obj.write("The Mean reciprocal rank precision for the results is : " + str(e.mean_reciprocal_rank())+ '\n')
-        print("The precision at rank 5 : " + str(e.average_precision_at_k(5)))
+        # print("The precision at rank 5 : " + str(e.average_precision_at_k(5)))
         out_obj.write("The precision at rank 5 : " + str(e.average_precision_at_k(5)) + '\n')
-        print("The precision at rank 20 : " + str(e.average_precision_at_k(20)))
+        # print("The precision at rank 20 : " + str(e.average_precision_at_k(20)))
         out_obj.write("The precision at rank 20 : " + str(e.average_precision_at_k(20)) + '\n')
-        print("The precision and recall tables are as follows: \n")
+        # print("The precision and recall tables are as follows: \n")
         out_obj.write("The precision and recall tables are as follows: \n")
         e.precision_and_recall(out_obj)
         out_obj.close()

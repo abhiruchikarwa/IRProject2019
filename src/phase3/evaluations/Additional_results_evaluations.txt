@@ -1,7 +1,7 @@
-The Mean average precision for the results is : 0.2667246673860642
-The Mean reciprocal rank precision for the results is : 1.0
-The precision at rank 5 : 0.3923076923076923
-The precision at rank 20 : 0.20192307692307698
+The Mean average precision for the results is : 0.3990708058832026
+The Mean reciprocal rank precision for the results is : 0.6628262899362644
+The precision at rank 5 : 0.34230769230769226
+The precision at rank 20 : 0.20000000000000007
 The precision and recall tables are as follows: 
 
  Query ID: 1

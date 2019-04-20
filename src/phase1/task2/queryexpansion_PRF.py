@@ -49,12 +49,11 @@ class QueryExpander:
         # fetch query from queries.txt here
         h = Helper.Helper()
         queries = h.get_queries()
-        query = queries[int(query)]
+        query_text = queries[int(query)]
         document_frequency_table = self.generate_document_frequency_table(inverted_index)
-        terms = self.find_candidate_expansion_terms(query, document_frequency_table)
+        terms = self.find_candidate_expansion_terms(query_text, document_frequency_table)
         f_obj = open(OUTPUT_FILE, 'a')
-        f_obj.write('\nquery: ' + query + ' :\n')
-        f_obj.write('Terms: ' + ' '.join(list(terms.keys())[:self.N]))
+        f_obj.write(str(query) + ' ' + query_text + " " + ' '.join(list(terms.keys())[:self.N])+ "\n")
         f_obj.close()
 
     def find_candidate_expansion_terms(self, query, doc_freq_table):
@@ -85,10 +84,6 @@ def main():
     indexer.generate_inverted_index(query_expander.K)
     # iterate through all files to find the candidate expansion terms for the corresponding query
     files = [f for f in listdir(INITIAL_INDEX_FOLDER) if isfile(join(INITIAL_INDEX_FOLDER, f))]
-    f_obj = open(OUTPUT_FILE, 'w')
-    f_obj.write('The terms chosen for expansion for queries are:'
-                '(when K = ' + str(query_expander.K) + ' and N = ' + str(query_expander.N) + ')\n')
-    f_obj.close()
     for f in files:
         f = join(INITIAL_INDEX_FOLDER, f)
         query_expander.generate_corpus_statistics(f)
