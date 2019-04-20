@@ -1,13 +1,23 @@
 ## Instructions for the baseline runs of the following
 
-
 ### 1. BM25
+#### Requirements
+- `nltk (pip3 install nltk)`
+- `collections.OrderedDict`
+- `math`
+- `os`
 
 #### Compile & run
-
+- python3 `BM25.py`
 ---
 
 ### 2. Query Likelihood Model (JM Smoothed)
+
+#### Requirements
+- `math`
+
+#### Compile & run
+- python3 `JMRetriever.py`
 
 ---
 
@@ -31,3 +41,10 @@ Please follow the format of the folder path suggested, while giving inputs.
 ---
 
 ### 4. TF-IDF
+#### Requirements
+- `collections`
+- `os`
+- `math`
+
+#### Compile & run
+- python3 `tfidf.py`
