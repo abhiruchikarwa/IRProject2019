@@ -1,8 +1,17 @@
 ## Instructions for the baseline runs of the following
 
 
-### 1. Lucene
+### 1. BM25
 
+#### Compile & run
+
+---
+
+### 2. Query Likelihood Model (JM Smoothed)
+
+---
+
+### 3. Lucene
 #### Setup
  - Install Apache Lucene - 4.7.2.
  - Add the following jar files to your java project’s list of referenced libraries:
@@ -19,4 +28,6 @@ The program takes the following inputs:
 It is recommended to create two folders named index and lucene_results to be used.
 Please follow the format of the folder path suggested, while giving inputs.
 
- 
+---
+
+### 4. TF-IDF
