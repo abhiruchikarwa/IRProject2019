@@ -196,6 +196,8 @@ This folder contains implementations for snippet generation:
 ##### Setup Requirements for snippet generation:
  - nltk (`pip3 install nltk`) 
  - beautiful soup (`pip3 install bs4`)
+ - create `snippet_results/` folder in the same directory 
+
  
 ##### For running snippet_generation.py, do:
     `python3 snippet_generation.py`
